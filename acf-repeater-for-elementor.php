@@ -8,7 +8,7 @@ Plugin Name: ACF Repeater for Elementor
 Plugin URI: http://wordpress.org/plugins/acf-repeater-for-elementor/
 Description: Easy and simple way to use acf pro repeater in elementor.
 Author: Sympl
-Version: 1.3
+Version: 1.4
 Author URI: https://sympl.co.il/
 */
 
