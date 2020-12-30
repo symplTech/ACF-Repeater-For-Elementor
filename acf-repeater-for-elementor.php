@@ -1,7 +1,7 @@
 <?php
 /**
  * @package ACF Repeater for Elementor
- * @version 1.3
+ * @version 1.4
  */
 /*
 Plugin Name: ACF Repeater for Elementor
@@ -13,8 +13,29 @@ Author URI: https://sympl.co.il/
 */
 
 
+add_action( 'elementor/frontend/section/before_render', function( $section ) {
+    // Catch output
+    ob_start();
+} );
+// And then
+add_action( 'elementor/frontend/section/after_render', function( $section ) {
+    // Collect output
+    $content = ob_get_clean();
+
+    // Alter the output anyway you want, in your case wrapping 
+    // it with a classed div should be something like this
+    // make sure to echo it
+    	if($repeater_name = arfe_check_if_repeater_class_in_widget($section, 'css_classes')) {
+			echo arfe_prepare_content_by_repeater($content, $repeater_name);
+	} else {
+			echo $content;
+		}
+} );
+
+
 //handle accordion and toggle for repeater
 add_action( 'elementor/frontend/widget/before_render', function( $widget ) {
+
 	if($widget->get_name()=="toggle" || $widget->get_name()=="accordion") {
 		if($repeater_name = arfe_check_if_repeater_class_in_widget($widget) ){
 			$repeater = get_field($repeater_name);
@@ -48,8 +69,16 @@ add_action( 'elementor/widget/render_content', function( $content, $widget ) {
 	}
 		$repeater_name = arfe_check_if_repeater_class_in_widget($widget);
 	if ($repeater_name) {
+		return arfe_prepare_content_by_repeater($content, $repeater_name);
+	}
+   
+   return $content;
+}, 10, 2 );
+
+
+function arfe_prepare_content_by_repeater($content, $repeater_name) {
 		$repeater = get_field($repeater_name);
-		if(count($repeater) == 0) {
+		if(!$repeater || count($repeater) == 0) {
 			return "";
 		}
 		
@@ -62,13 +91,11 @@ add_action( 'elementor/widget/render_content', function( $content, $widget ) {
 			$new_view = $new_view.''.$single_content;
 		}
 		return $new_view;
-	}
-   
-   return $content;
-}, 10, 2 );
+}
 
-function arfe_check_if_repeater_class_in_widget($widget) {
-	$classes = $widget->get_settings()['_css_classes'];
+
+function arfe_check_if_repeater_class_in_widget($widget,$classes_key = '_css_classes') {
+	$classes = $widget->get_settings()[$classes_key];
 	$classes = explode("repeater_", $classes);
 	if (count($classes)>1) {
 		$repeater_name = explode(" ", $classes[1])[0];
