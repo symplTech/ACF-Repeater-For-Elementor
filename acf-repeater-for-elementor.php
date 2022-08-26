@@ -1,14 +1,14 @@
 <?php
 /**
  * @package ACF Repeater for Elementor
- * @version 1.4
+ * @version 1.5
  */
 /*
 Plugin Name: ACF Repeater for Elementor
 Plugin URI: http://wordpress.org/plugins/acf-repeater-for-elementor/
 Description: Easy and simple way to use acf pro repeater in elementor.
 Author: Sympl
-Version: 1.4
+Version: 1.5
 Author URI: https://sympl.co.il/
 */
 
@@ -47,14 +47,16 @@ add_action( 'elementor/frontend/widget/before_render', function( $widget ) {
 			}
 			$template_tab = $template_tab[0];
 			unset($template_tab['_id']);
-			foreach($repeater as $row) {
-				$json_tab = json_encode($template_tab);
-				foreach($row as $key => $value ) {
-					$json_tab = str_replace("#".$key, $value, $json_tab);
-				}
-				array_push($create_tabs, json_decode($json_tab, true));
-			}
-			$widget->set_settings('tabs', $create_tabs);
+// 			foreach($repeater as $row) {
+// 				$json_tab = json_encode($template_tab);
+// 				foreach($row as $key => $value ) {
+// 					echo $key;
+// 					$json_tab = str_replace("#".$key, $value, $json_tab);
+// 				}
+// 				array_push($create_tabs, json_decode($json_tab, true));
+// 			}
+// 			$widget->set_settings('tabs', $create_tabs);
+			$widget->set_settings('tabs', $repeater);
 			} else {//no items in repeater.. delete all tabs
 				$widget->set_settings('tabs', array());
 			}
@@ -77,7 +79,34 @@ add_action( 'elementor/widget/render_content', function( $content, $widget ) {
 
 
 function arfe_prepare_content_by_repeater($content, $repeater_name) {
-		$repeater = get_field($repeater_name);
+		
+		if(empty($repeater_name)){
+			return "";
+			
+		} elseif( strpos($repeater_name, 'option_') !== false ){
+			
+			$repeater_name = str_replace('option_', '', $repeater_name);
+			$repeater = get_field($repeater_name, 'option');
+			
+		} elseif( strpos($repeater_name, 'user_') !== false ){
+			
+			$repeater_name = explode('_', str_replace('user_', '', $repeater_name) );
+			$user_id = $repeater_name[0];
+			$repeater_name = strval($repeater_name[1]);
+			$repeater = get_field($repeater_name, "user_$user_id");
+			
+		} elseif( strpos($repeater_name, 'author_') !== false ){
+			
+			global $post;
+			$author_id = get_post_field( 'post_author', $post->ID );
+			$repeater_name = str_replace('author_', '', $repeater_name);
+			$repeater = get_field($repeater_name, "user_$author_id");
+			
+		} else {
+			
+			$repeater = get_field($repeater_name);
+		}
+	
 		if(!$repeater || count($repeater) == 0) {
 			return "";
 		}
