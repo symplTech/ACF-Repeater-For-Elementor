@@ -47,15 +47,7 @@ add_action( 'elementor/frontend/widget/before_render', function( $widget ) {
 			}
 			$template_tab = $template_tab[0];
 			unset($template_tab['_id']);
-// 			foreach($repeater as $row) {
-// 				$json_tab = json_encode($template_tab);
-// 				foreach($row as $key => $value ) {
-// 					echo $key;
-// 					$json_tab = str_replace("#".$key, $value, $json_tab);
-// 				}
-// 				array_push($create_tabs, json_decode($json_tab, true));
-// 			}
-// 			$widget->set_settings('tabs', $create_tabs);
+
 			$widget->set_settings('tabs', $repeater);
 			} else {//no items in repeater.. delete all tabs
 				$widget->set_settings('tabs', array());
